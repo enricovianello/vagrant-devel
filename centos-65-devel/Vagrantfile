@@ -1,0 +1,38 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+GPFS_DISK_FILE = ENV['HOME']+'/gpfs/disk.vdi'
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.box = "centos65"
+  # config.vm.box_url = "http://domain.com/path/to/above.box"
+
+  config.vm.network :forwarded_port, guest: 8443, host: 4443
+  config.vm.network :forwarded_port, guest: 8080, host: 4080
+
+  config.vm.hostname = "centos65-devel"
+
+  config.ssh.forward_agent = true
+
+  config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "2048"]
+      unless File.exist?(GPFS_DISK_FILE)
+        ## 2GB GPFS HD
+        vb.customize ["createhd", "--filename", GPFS_DISK_FILE, "--size", 2000 * 1024]
+      end
+
+      ## attach gpfs disk to vm
+      vb.customize ["storageattach", :id, "--storagectl", "SATA", "--port", 4, "--device", 0, "--type", "hdd", "--medium", GPFS_DISK_FILE]
+  end
+
+  config.vm.provision "shell", path: "boostrap-devel.sh"
+
+  config.vm.provision "puppet" do |puppet|
+    puppet.manifest_file = "default.pp"
+  end
+
+  config.vm.provision "shell", path: "build-gpfs-kernel-extensions.sh"
+  config.vm.provision "shell", path: "gpfs-create-cluster.sh"
+end
