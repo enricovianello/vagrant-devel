@@ -11,8 +11,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.network :forwarded_port, guest: 8443, host: 4443
   config.vm.network :forwarded_port, guest: 8080, host: 4080
+  config.vm.network :forwarded_port, guest: 8085, host: 4085
 
-  config.vm.hostname = "centos65-devel"
+  config.vm.hostname = "centos6-devel.cnaf.infn.it"
 
   config.ssh.forward_agent = true
 

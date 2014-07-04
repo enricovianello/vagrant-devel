@@ -9,9 +9,9 @@ include puppet-test-ca
 include puppet-infn-ca
 
 # Other useful tools
-include puppet-grinder
-# include puppet-robot-framework
+#include puppet-grinder
+#include puppet-robot-framework
 
 # Project build dependencies
-include puppet-storm-build-deps
-include puppet-voms-build-deps
+#include puppet-storm-build-deps
+# include puppet-voms-build-deps
