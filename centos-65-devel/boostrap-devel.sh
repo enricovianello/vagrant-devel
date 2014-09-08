@@ -4,7 +4,7 @@ set -e
 # Install certificate
 mkdir -p /etc/grid-security
 cp /vagrant/certificate/centos6_devel_cnaf_infn_it.cert.pem /etc/grid-security/hostcert.pem
-cp /vagrant/certificate/centos6_devel_cnaf_infn_it.cert.pem /etc/grid-security/hostkey.pem
+cp /vagrant/certificate/centos6_devel_cnaf_infn_it.key.pem /etc/grid-security/hostkey.pem
 chmod 644 /etc/grid-security/hostcert.pem
 chmod 400 /etc/grid-security/hostkey.pem
 
