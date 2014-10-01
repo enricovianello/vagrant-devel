@@ -7,6 +7,7 @@ include puppet-oracle-repo
 include puppet-egi-trust-anchors
 include puppet-test-ca
 include puppet-infn-ca
+include puppet-test-vos
 
 # Other useful tools
 include puppet-grinder
