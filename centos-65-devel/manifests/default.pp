@@ -10,7 +10,7 @@ include puppet-infn-ca
 include puppet-test-vos
 
 # Other useful tools
-include puppet-grinder
+# include puppet-grinder
 include puppet-robot-framework
 
 # Project build dependencies

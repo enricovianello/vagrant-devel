@@ -13,7 +13,7 @@ echo "hostname -f => $(hostname -f)"
 modules_dir="/etc/puppet/modules"
 
 # Install puppet (assume it's not provided in the base image)
-yum -y install puppet redhat-lsb-core ntp
+yum -y install puppet redhat-lsb-core ntp vim-enhanced
 
 # Setup ssh root key for GPFS self-communication
 ssh-keygen -b 2048 -t rsa -f /root/.ssh/id_rsa -q -N ""

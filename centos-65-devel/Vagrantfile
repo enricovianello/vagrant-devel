@@ -4,19 +4,31 @@
 VAGRANTFILE_API_VERSION = "2"
 GPFS_DISK_FILE = ENV['HOME']+'/gpfs/disk.vdi'
 
+STORM_BUILD_DIR = ENV['HOME'] + '/git/storm'
+STORM_WEBDAV_BUILD_DIR = ENV['HOME'] + '/git/storm-webdav'
+VOMS_ADMIN_BUILD_DIR = ENV['HOME'] + '/git/voms-admin-server'
+ARGUS_BUILD_DIR = ENV['HOME'] + '/git/argus-pap'
+JREBEL_BASE_DIR = ENV['HOME'] + '/.jrebel'
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.box = "centos65"
-  # config.vm.box_url = "http://domain.com/path/to/above.box"
+  config.vm.box_url = "https://github.com/2creatives/vagrant-centos/releases/download/v6.5.3/centos65-x86_64-20140116.box"
 
   config.vm.network :forwarded_port, guest: 8443, host: 4443
   config.vm.network :forwarded_port, guest: 8085, host: 4085
+  config.vm.network :forwarded_port, guest: 8088, host: 4088
   config.vm.network :forwarded_port, guest: 1044, host: 1044
 
   config.vm.hostname = "centos6-devel.cnaf.infn.it"
 
-  config.vm.synced_folder "/opt/storm-webdav", "/opt/storm-webdav", owner: "vagrant", group: "vagrant"
-  config.vm.synced_folder "/Users/cecco/", "/andrea-home", owner: "root", group: "root"
+  config.vm.synced_folder ENV['HOME'], "/opt/home", owner: "root", group: "root"
+  config.vm.synced_folder STORM_BUILD_DIR, "/opt/storm", owner: "root", group: "root"
+  config.vm.synced_folder STORM_WEBDAV_BUILD_DIR, "/opt/storm-webdav", owner: "vagrant", group: "vagrant"
+  config.vm.synced_folder VOMS_ADMIN_BUILD_DIR, "/opt/voms-admin", owner: "vagrant", group: "vagrant"
+  config.vm.synced_folder ARGUS_BUILD_DIR, "/opt/argus-pap", owner: "vagrant", group: "vagrant"
+  config.vm.synced_folder JREBEL_BASE_DIR, "/opt/jrebel", owner: "voms", group: "voms"
+
   config.ssh.forward_agent = true
 
   config.vm.provider :virtualbox do |vb|
@@ -36,4 +48,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provision "shell", path: "build-gpfs-kernel-extensions.sh"
   config.vm.provision "shell", path: "gpfs-create-cluster.sh"
+  config.vm.provision "shell", path: "gpfs-create-fs.sh"
+  config.vm.provision "shell", path: "deploy-storm.sh"
 end
