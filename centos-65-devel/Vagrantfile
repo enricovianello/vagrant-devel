@@ -44,6 +44,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "shell", path: "boostrap-devel.sh"
   config.vm.provision "puppet" do |puppet|
     puppet.manifest_file = "default.pp"
+    puppet.module_path = "/etc/puppet/modules:/ci-puppet-modules/modules"
   end
 
   config.vm.provision "shell", path: "build-gpfs-kernel-extensions.sh"

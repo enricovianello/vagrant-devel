@@ -36,9 +36,10 @@ puppet module install --force puppetlabs-java
 
 echo "Fetching puppet modules from: https://github.com/cnaf"
 
-list=$(curl -s -S https://api.github.com/orgs/cnaf/repos|grep html_url|sed  's/[","]//g'|sed -rn  's/.+(https.+(puppet))/\1/p'|sed  's/https/git/g')
-
-for url in $list; do 
-  repo=$(echo $url|sed -rn  's/(^git.+(puppet))/\2/p' )
-  git clone $url $modules_dir/$repo;
-done
+if [ ! -e "ci-puppet-modules" ]; then
+  git clone https://github.com/cnaf/ci-puppet-modules.git
+else
+  pushd ci-puppet-modules
+  git pull
+  popd
+fi
