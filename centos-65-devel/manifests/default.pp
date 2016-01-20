@@ -14,5 +14,5 @@ include puppet-test-vos
 include puppet-robot-framework
 
 # Project build dependencies
-include puppet-storm-build-deps
+#include puppet-storm-build-deps
 include puppet-voms-build-deps

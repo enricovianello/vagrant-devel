@@ -1,0 +1,48 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+GPFS_DISK_FILE = ENV['HOME']+'/gpfs/disk.vdi'
+
+STORM_BUILD_DIR = ENV['HOME'] + '/git/storm'
+STORM_WEBDAV_BUILD_DIR = ENV['HOME'] + '/git/storm-webdav'
+STORM_INFOPROVIDER_BUILD_DIR = ENV['HOME'] + '/git/storm-info-provider'
+STORM_TESTSUITE_DIR = ENV['HOME'] + '/git/storm-testsuite'
+STORM_LOAD_TESTSUITE_DIR = ENV['HOME'] + '/git/grinder-load-testsuite'
+STORM_QUOTACTL_DIR = ENV['HOME'] + '/git/storm-quotactl-java'
+#VOMS_ADMIN_BUILD_DIR = ENV['HOME'] + '/git/voms-admin-server'
+#ARGUS_BUILD_DIR = ENV['HOME'] + '/git/argus-pap'
+#JREBEL_BASE_DIR = ENV['HOME'] + '/.jrebel'
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.box = "centos7"
+  config.vm.box_url = "https://f0fff3908f081cb6461b407be80daf97f07ac418.googledrive.com/host/0BwtuV7VyVTSkUG1PM3pCeDJ4dVE/centos7.box"
+
+#  config.vm.network :forwarded_port, guest: 8443, host: 4443
+#  config.vm.network :forwarded_port, guest: 8085, host: 4085
+#  config.vm.network :forwarded_port, guest: 8088, host: 4088
+#  config.vm.network :forwarded_port, guest: 1044, host: 1045
+#  config.vm.network :forwarded_port, guest: 2170, host: 2170
+
+  config.vm.hostname = "centos7-devel.cnaf.infn.it"
+  
+  config.ssh.forward_agent = true
+  config.ssh.forward_x11 = true
+
+  config.vm.provision "shell", path: "kernel-devel.sh"
+  config.vm.provision "shell", path: "boostrap-devel.sh"
+  config.vm.provision "puppet" do |puppet|
+    puppet.manifest_file = "default.pp"
+    puppet.options = "--modulepath /etc/puppet/modules:/home/vagrant/ci-puppet-modules/modules"
+  end
+
+  config.vm.synced_folder ENV['HOME'], "/opt/home", owner: "root", group: "root"
+  config.vm.synced_folder STORM_BUILD_DIR, "/opt/storm", owner: "root", group: "root"
+  config.vm.synced_folder STORM_WEBDAV_BUILD_DIR, "/opt/storm-webdav", owner: "vagrant", group: "vagrant"
+  config.vm.synced_folder STORM_TESTSUITE_DIR, "/home/vianello/storm-testsuite", owner: "vianello", group: "vianello"
+  config.vm.synced_folder STORM_LOAD_TESTSUITE_DIR, "/home/vianello/grinder-load-testsuite", owner: "vianello", group: "vianello"
+  config.vm.synced_folder STORM_QUOTACTL_DIR, "/home/vianello/storm-quotactl-java", owner: "vianello", group: "vianello"
+  config.vm.synced_folder STORM_INFOPROVIDER_BUILD_DIR, "/home/vianello/storm-info-provider", owner: "vianello", group: "vianello"
+
+end

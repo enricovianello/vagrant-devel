@@ -1,1 +1,4 @@
 centos-65-devel/.vagrant
+centos-7/.vagrant
+.project
+*.DS_STORE
