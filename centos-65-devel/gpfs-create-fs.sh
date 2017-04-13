@@ -9,9 +9,9 @@ if [ ! -e "${disk_def_file}" ]; then
   mmcrnsd -F ${disk_def_file}
   mmcrfs gpfs -F ${disk_def_file} -A yes -Q yes -T /storage
   mmmount /storage -a
-  mmcrfileset gpfs testers.eu-emi.eu
+  mmcrfileset gpfs test.vo
   mmlsfileset gpfs
-  mmlinkfileset gpfs testers.eu-emi.eu -J /storage/testers.eu-emi.eu
+  mmlinkfileset gpfs test.vo -J /storage/test.vo
   mount
 else
   mmunmount gpfs

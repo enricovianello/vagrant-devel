@@ -1,18 +1,17 @@
 # Please keep the following in the order
 # in which they are listed.
-include puppet-users
-include puppet-gpfs-repo
-include puppet-gpfs
-include puppet-oracle-repo
-include puppet-egi-trust-anchors
-include puppet-test-ca
-include puppet-infn-ca
-include puppet-test-vos
+include mwdevel_gpfs_repo
+include mwdevel_gpfs
+include mwdevel_oracle_repo
+include mwdevel_egi_trust_anchors
+include mwdevel_test_ca
+include mwdevel_infn_ca
+include mwdevel_test_vos
 
 # Other useful tools
 # include puppet-grinder
-include puppet-robot-framework
+include mwdevel_robot_framework
 
 # Project build dependencies
 #include puppet-storm-build-deps
-include puppet-voms-build-deps
+#include puppet-voms-build-deps

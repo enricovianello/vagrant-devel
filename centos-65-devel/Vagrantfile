@@ -2,39 +2,80 @@
 # vi: set ft=ruby :
 
 VAGRANTFILE_API_VERSION = "2"
-GPFS_DISK_FILE = ENV['HOME']+'/gpfs/disk.vdi'
+GPFS_DISK_FILE = ENV['HOME']+'/gpfs/gpfs.vdi'
 
-STORM_BUILD_DIR = ENV['HOME'] + '/git/storm'
-STORM_WEBDAV_BUILD_DIR = ENV['HOME'] + '/git/storm-webdav'
-STORM_LOAD_TESTSUITE_DIR = ENV['HOME'] + '/git/grinder-load-testsuite'
+STORM_BACKEND_BUILD_DIR = ENV['HOME'] + '/git/storm'
+# STORM_WEBDAV_BUILD_DIR = ENV['HOME'] + '/git/storm-webdav'
+# STORM_LOAD_TESTSUITE_DIR = ENV['HOME'] + '/git/grinder-load-testsuite'
+STORM_TESTSUITE_BUILD_DIR = ENV['HOME'] + '/git/storm-testsuite'
+# INDIGO_CDMI_SERVER_DIR = ENV['HOME'] + '/git/CDMI'
+# STORM_CDMI_PLUGIN_DIR = ENV['HOME'] + '/git/storm-cdmi-spi'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-  config.vm.box = "centos65"
-  config.vm.box_url = "https://github.com/2creatives/vagrant-centos/releases/download/v6.5.3/centos65-x86_64-20140116.box"
-  
+  config.ssh.forward_agent = true
+
+  config.vm.box = "centos/6"
+  config.vm.box_check_update = "true"
+
+  config.vm.hostname = "centos6-devel.cnaf.infn.it"
+  config.vm.network "private_network", ip: "192.168.50.50"
+
   config.vm.network :forwarded_port, guest: 8443, host: 5443
   config.vm.network :forwarded_port, guest: 8085, host: 5085
   config.vm.network :forwarded_port, guest: 8088, host: 5088
+  config.vm.network :forwarded_port, guest: 8080, host: 5080
   config.vm.network :forwarded_port, guest: 1044, host: 5044
   config.vm.network :forwarded_port, guest: 2170, host: 5170
+  config.vm.network :forwarded_port, guest: 9998, host: 9998
+  config.vm.network :forwarded_port, guest: 8444, host: 8444
 
-  config.vm.hostname = "centos6-devel.cnaf.infn.it"
-  
-  config.vm.synced_folder ENV['HOME'], "/opt/home", owner: "root", group: "root"
-  config.vm.synced_folder STORM_BUILD_DIR, "/opt/storm", owner: "root", group: "root"
-  config.vm.synced_folder STORM_WEBDAV_BUILD_DIR, "/opt/storm-webdav", owner: "vagrant", group: "vagrant"
-  config.vm.synced_folder STORM_LOAD_TESTSUITE_DIR, "/home/vianello/grinder-load-testsuite", owner: "vianello", group: "vianello"
+  # config.vm.synced_folder ENV['HOME'], "/opt/home", owner: "root", group: "root"
+  config.vm.synced_folder STORM_BACKEND_BUILD_DIR, "/opt/storm"
+  # config.vm.synced_folder STORM_WEBDAV_BUILD_DIR, "/opt/storm-webdav", owner: "root", group: "root"
+  # config.vm.synced_folder STORM_LOAD_TESTSUITE_DIR, "/home/vianello/grinder-load-testsuite", owner: "vianello", group: "vianello"
+  config.vm.synced_folder STORM_TESTSUITE_BUILD_DIR, "/opt/storm-testsuite", owner: "root", group: "root"
+  # config.vm.synced_folder STORM_CDMI_PLUGIN_DIR, "/opt/cdmi-storm", owner: "root", group: "root"
+  # config.vm.synced_folder INDIGO_CDMI_SERVER_DIR, "/opt/cdmi", owner: "root", group: "root"
 
-  config.ssh.forward_agent = true
-  
+  config.vm.provision :file, source: "certificate/centos6_devel_cnaf_infn_it.cert.pem", destination: "/tmp/hostcert.pem"
+  config.vm.provision :file, source: "certificate/centos6_devel_cnaf_infn_it.key.pem", destination: "/tmp/hostkey.pem"
+
+  config.vm.provider :virtualbox do |vb|
+        vb.name = "centos6_devel_cnaf_infn_it"
+        begin
+          vb.customize ["storagectl", :id, "--name", "SATA Controller", "--add", "sata"]
+        rescue => e
+          puts e
+          puts e.message
+        end
+        vb.customize ["modifyvm", :id, "--memory", "2048"]
+        unless File.exist?(GPFS_DISK_FILE)
+          ## 2GB GPFS HD
+          vb.customize ["createhd", "--filename", GPFS_DISK_FILE, "--size", 2000 * 1024]
+        end
+        ## attach gpfs disk to vm
+        vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', GPFS_DISK_FILE]
+        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+        vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+    end
+
   config.vm.provision "shell", path: "bootstrap-devel.sh"
+  config.vm.provision "shell", path: "bootstrap-host.sh"
+  config.vm.provision "shell", path: "bootstrap-puppet.sh"
+
   config.vm.provision "puppet" do |puppet|
-    puppet.manifest_file = "default.pp"
-    puppet.options = "--modulepath /etc/puppet/modules:/home/vagrant/ci-puppet-modules/modules"
+    # puppet.manifest_file = "default.pp"
+    puppet.module_path = ["/etc/puppet/modules"]
   end
 
+  config.vm.provision "shell", path: "gpfs-init-key.sh"
+  config.vm.provision "shell", path: "build-gpfs-kernel-extensions.sh"
+  config.vm.provision "shell", path: "gpfs-create-cluster.sh"
+  config.vm.provision "shell", path: "gpfs-create-fs.sh"
+
+  # config.vm.provision "shell", path: "bootstrap-grinder.sh"
+  config.vm.provision "shell", path: "setup-testsuite.sh"
   config.vm.provision "shell", path: "deploy-storm.sh"
-   
-   
+  config.vm.provision "shell", path: "bootstrap-post-setup.sh"
 end
