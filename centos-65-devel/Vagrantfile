@@ -10,6 +10,7 @@ STORM_BACKEND_BUILD_DIR = ENV['HOME'] + '/git/storm'
 STORM_TESTSUITE_BUILD_DIR = ENV['HOME'] + '/git/storm-testsuite'
 # INDIGO_CDMI_SERVER_DIR = ENV['HOME'] + '/git/CDMI'
 # STORM_CDMI_PLUGIN_DIR = ENV['HOME'] + '/git/storm-cdmi-spi'
+STORM_INFO_PROVIDER_DIR = ENV['HOME'] + '/git/storm-info-provider'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
@@ -37,19 +38,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder STORM_TESTSUITE_BUILD_DIR, "/opt/storm-testsuite", owner: "root", group: "root"
   # config.vm.synced_folder STORM_CDMI_PLUGIN_DIR, "/opt/cdmi-storm", owner: "root", group: "root"
   # config.vm.synced_folder INDIGO_CDMI_SERVER_DIR, "/opt/cdmi", owner: "root", group: "root"
+  config.vm.synced_folder STORM_INFO_PROVIDER_DIR, "/opt/info-provider", owner: "root", group: "root"
 
   config.vm.provision :file, source: "certificate/centos6_devel_cnaf_infn_it.cert.pem", destination: "/tmp/hostcert.pem"
   config.vm.provision :file, source: "certificate/centos6_devel_cnaf_infn_it.key.pem", destination: "/tmp/hostkey.pem"
 
   config.vm.provider :virtualbox do |vb|
         vb.name = "centos6_devel_cnaf_infn_it"
-        begin
-          vb.customize ["storagectl", :id, "--name", "SATA Controller", "--add", "sata"]
-        rescue => e
-          puts e
-          puts e.message
-        end
-        vb.customize ["modifyvm", :id, "--memory", "2048"]
+        #vb.customize ["storagectl", :id, "--name", "SATA Controller", "--add", "sata"]
+        #vb.customize ["modifyvm", :id, "--memory", "2048"]
         unless File.exist?(GPFS_DISK_FILE)
           ## 2GB GPFS HD
           vb.customize ["createhd", "--filename", GPFS_DISK_FILE, "--size", 2000 * 1024]

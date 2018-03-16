@@ -35,7 +35,7 @@ yum install -y emi-storm-backend-mp emi-storm-frontend-mp emi-storm-globus-gridf
 echo "Install StoRM test stuff ..."
 yum install -y emi-storm-srm-client-mp globus-gass-copy-progs lcg-util dcache-srmclient davix
 
-mkdir -p /etc/storm
+mkdir -p /etc/storm/siteinfo
 
 if [ ! -e "storm-deployment-test" ]; then
   git clone https://github.com/italiangrid/storm-deployment-test.git
@@ -44,7 +44,7 @@ else
   git pull
   popd
 fi
-cp -a storm-deployment-test/siteinfo /etc/storm/siteinfo
+cp -a storm-deployment-test/siteinfo/clean/* /etc/storm/siteinfo
 
 #STORM_BE_JAR="/usr/share/java/storm-backend-server/storm-backend-server.jar"
 #STORM_DEVEL_JAR="/opt/storm/target/storm-backend-server.jar"
@@ -54,8 +54,7 @@ cp -a storm-deployment-test/siteinfo /etc/storm/siteinfo
 #  ln -s ${STORM_DEVEL_JAR} ${STORM_BE_JAR}
 #fi
 
-# chown /storage
-chown -R storm:storm /storage/test.vo
+chown -R storm:storm /storage
 
 # run yaim
 /opt/glite/yaim/bin/yaim -c -s /etc/storm/siteinfo/storm.def -n se_storm_backend -n se_storm_frontend -n se_storm_gridftp -n se_storm_webdav
